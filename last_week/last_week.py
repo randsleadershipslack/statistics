@@ -352,7 +352,8 @@ class LastWeek(object):
             activity_by_channel[channel]['$average'] = (total * 1.0) / user_count
 
         self.sorted_channels = sorted(activity_by_channel.keys(), key=lambda x: activity_by_channel[x]['$total'], reverse=True)
-        self.sorted_users = sorted(activity_by_user.keys(), key=lambda x: activity_by_user[x]['$total'], reverse=True)
+        users = sorted(activity_by_user.keys())
+        self.sorted_users = sorted(users, key=lambda x: activity_by_user[x]['$total'], reverse=True)
         self.activity_by_channel = activity_by_channel
         self.activity_by_user = activity_by_user
         self.reactions = reactions
