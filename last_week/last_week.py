@@ -404,8 +404,15 @@ class LastWeek(object):
 
         total = 0
 
-        for idx, su in enumerate(self.sorted_users):
-            blob += "<td>{} <b>{}</b></td>\n".format(idx + 1, su)
+        idx = 0
+        last_user = None
+        for su in self.sorted_users:
+            last = self.activity_by_user.get(last_user, {}).get("$total", 0)
+            cur = self.activity_by_user.get(su, {}).get("$total", 0)
+            if cur != last:
+                idx += 1
+            blob += "<td>{} <b>{}</b></td>\n".format(idx, su)
+            last_user = su
         blob += "</tr>\n"
         rows = []
         for idx, channel in enumerate(self.sorted_channels):
