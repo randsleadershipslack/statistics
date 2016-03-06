@@ -391,7 +391,7 @@ class LastWeek(object):
     def create_report(self):
 
         with open('table.css', 'r') as myfile:
-            css = myfile.read().replace('\n', '') 
+            css = myfile.read().replace('\n', '')
 
         blob = """
         <html>
@@ -567,11 +567,17 @@ class LastWeek(object):
         su = self.sorted_users
         # figure out first female poster
         users = [(position, x, self.get_gender(x)) for (position, x) in enumerate(su)]
-        female = [x for x in users if x[2] == "female"][0]
-        undetermined = [x for x in users if x[2] == "undetermined"][0]
+        female = [x for x in users if x[2] == "female"]
+        if female:
+            female = female[0]
+        undetermined = [x for x in users if x[2] == "undetermined"]
+        if undetermined:
+            undetermined = undetermined[0]
 
-        blob += "Highest-ranked female-gender poster: <b>{}</b>, rank {}<p/>".format(female[1], female[0])
-        blob += "Highest-ranked undetermined-gender poster: <b>{}</b>, rank {}".format(undetermined[1], undetermined[0])
+        if female:
+            blob += "Highest-ranked female-gender poster: <b>{}</b>, rank {}<p/>".format(female[1], female[0])
+        if undetermined:
+            blob += "Highest-ranked undetermined-gender poster: <b>{}</b>, rank {}".format(undetermined[1], undetermined[0])
         blob += "</td>"
 
         blob += "</tr>"
