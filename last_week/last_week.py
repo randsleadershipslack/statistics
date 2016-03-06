@@ -390,12 +390,18 @@ class LastWeek(object):
 
     def create_report(self):
 
+        with open('table.css', 'r') as myfile:
+            css = myfile.read().replace('\n', '') 
+
         blob = """
         <html>
             <head>
                 <title>
                     Channel/User Activity {} to {}
                 </title>
+                <style media="screen" type="text/css">
+                  {}
+                </style>
             </head>
             <body>
                 <h3><center>
@@ -407,7 +413,7 @@ class LastWeek(object):
         total = len(self.users.keys())
         per = (active * 100.0) / total
         # Header row: users
-        blob = blob.format(self.start_date, self.end_date, self.start_date, self.end_date)
+        blob = blob.format(self.start_date, self.end_date, css, self.start_date, self.end_date)
         blob += "<b>{}/{}</b> (or {:.1f}%) users were active<p/>".format(active, total, per)
         blob += "<b>Median message count</b> was {:.2f} messages<p/>".format(self.median_messages)
         blob += "<p/>For each user's total message cell, the first number is their total "
@@ -422,6 +428,7 @@ class LastWeek(object):
         blob += "<p/>"
         blob += "<b>wpm</b> is average words per message<p/>"
         blob += "numbers in parentheses after channel names are number of users in channel<p/>"
+        blob += '<div class="CSSTableGenerator">'
         blob += "<table border='1'>"
         blob += "<tr>"
         blob += "<td></td><td><b>TOTAL</b></td>"
@@ -465,7 +472,7 @@ class LastWeek(object):
         running = 0
         self.reaction_percentage = {}
         for su in self.sorted_users:
-            blob += "<td>"
+            blob += '<td style="vertical-align: text-top;">'
             cur = self.activity_by_user[su]['$total']
 
             c = 0
@@ -489,6 +496,7 @@ class LastWeek(object):
         for row in rows:
             blob += row
         blob += "</table>\n"
+        blob += "</div>\n"
         blob += "<p/>"
 
         blob += "<table border='1'>"
