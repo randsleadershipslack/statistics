@@ -121,6 +121,11 @@ class LastWeek(object):
             self.use_cache = False
             self.upload_flag = False
         print "use_cache: {}".format(self.use_cache)
+        if self.use_cache and not os.path.isdir("cache"):
+            os.makedirs("cache")
+        if not os.path.isdir("output"):
+            os.makedirs("output")
+
         self.pr = PopReactions(15)
 
     def get_channels(self):
