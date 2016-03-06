@@ -542,10 +542,11 @@ class LastWeek(object):
         blob += "<td>"
         blob += "Most reacted-to messages<p/>"
         for message, count in self.popular_messages:
+            a = message['ts'].replace(".", "")
             t = asciify(message['text'])
             u = self.users[message['user']]
             c = message['channel']
-            blob += "{} <b>reactions</b> {} by <b>{}</b> in <b>{}</b><br/>".format(count, t, u, c)
+            blob += '<b><a href="https://rands-leadership.slack.com/archives/{}/p{}">{} reactions</a></b> {} by <b>{}</b> in <b>{}</b><br/>'.format(c, a, count, t, u, c)
         blob += "</td>"
 
         blob += "<td>"
