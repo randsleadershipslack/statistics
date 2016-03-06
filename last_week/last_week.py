@@ -12,6 +12,11 @@ import zipfile
 
 import requests
 
+male = [x.strip() for x in open("male", "r").readlines()]
+female = [x.strip() for x in open("female", "r").readlines()]
+undetermined = [x.strip() for x in open("undetermined", "r").readlines()]
+
+genders = {'female': female, 'male': male, 'undetermined': undetermined}
 
 def asciify(text):
     text = ''.join([x for x in list(text) if ord(x) in range(128)])
@@ -251,6 +256,12 @@ class LastWeek(object):
         print "After filtering, got a total of {} messages for last week".format(len(messages))
         self.messages = messages
 
+    def get_gender(self, username):
+        for label in genders:
+            if username in genders[label]:
+                return label
+        return "unknown"
+
     def create_aggregates(self):
 
         idx = {}
@@ -264,6 +275,8 @@ class LastWeek(object):
         self.days = {}
         self.hours = {}
         pureemoji = 0
+        self.gendercount = {}
+        self.unknown = []
 
         for hour in range(0,24):
             self.hours[hour] = 0
@@ -284,6 +297,12 @@ class LastWeek(object):
             text = asciify(message['text'])
             wc = len(text.split())
             user = self.users[uid]
+            gender = self.get_gender(user)
+            if gender not in self.gendercount:
+                self.gendercount[gender] = 0
+            self.gendercount[gender] += 1
+            if gender == "unknown" and user not in self.unknown:
+                self.unknown.append(user)
             if user not in words:
                 words[user] = 0
             words[user] += wc
@@ -516,8 +535,34 @@ class LastWeek(object):
             blob += "{} <b>reactions</b> {} by <b>{}</b> in <b>{}</b><br/>".format(count, t, u, c)
         blob += "</td>"
 
+        blob += "<td>"
+        blob += "Messages by gender<p/>"
+        # blob += "<b>Warning:</b>Gender detection is manual and at risk for misgendering.  Please let @royrapoport know if you notice an error<p/>"
+        genders = sorted(self.gendercount.keys(), key=lambda x: self.gendercount[x])
+        total = 0
+        for gender in genders:
+            total += self.gendercount[gender]
+
+        for gender in genders:
+            per = self.gendercount[gender] * 100.0 / total
+            blob += "{} ({:.1f}%) messages from authors identified as {}<p/>".format(self.gendercount[gender], per, gender)
+        blob += "<p/>"
+        if self.unknown:
+            blob += "Unknown authors: {}".format(self.unknown)
+
+        su = self.sorted_users
+        # figure out first female poster
+        users = [(position, x, self.get_gender(x)) for (position, x) in enumerate(su)]
+        female = [x for x in users if x[2] == "female"][0]
+        undetermined = [x for x in users if x[2] == "undetermined"][0]
+
+        blob += "Highest-ranked female-gender poster: <b>{}</b>, rank {}<p/>".format(female[1], female[0])
+        blob += "Highest-ranked undetermined-gender poster: <b>{}</b>, rank {}".format(undetermined[1], undetermined[0])
+        blob += "</td>"
+
         blob += "</tr>"
         blob += "</table>"
+
 
         blob += "</body>\n"
         blob += "</html>\n"
