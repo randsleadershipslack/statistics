@@ -11,6 +11,7 @@ import time
 import zipfile
 
 import requests
+import config
 
 male = [x.strip() for x in open("male", "r").readlines()]
 female = [x.strip() for x in open("female", "r").readlines()]
@@ -71,6 +72,7 @@ class LastWeek(object):
     ignore_patterns = ["^zmeta-"]
     ignore_users = ['USLACKBOT']
     dayidx = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    gender_report = True
 
     def median(self, l):
         halfway = len(l) / 2
@@ -110,6 +112,9 @@ class LastWeek(object):
     def __init__(self, weeks_ago=0, debug=False, upload=True, cache=True):
 
         self.debug = debug
+        self.config = config.Config()
+        self.slack = self.config.slack_name
+        self.gender_report = self.config.gender_report
         self.weeks_ago = int(weeks_ago)
         # self.last_week()
         self.use_cache = cache
@@ -549,30 +554,31 @@ class LastWeek(object):
             blob += '<b><a href="https://rands-leadership.slack.com/archives/{}/p{}">{} reactions</a></b> {} by <b>{}</b> in <b>{}</b><br/>'.format(c, a, count, t, u, c)
         blob += "</td>"
 
-        blob += "<td>"
-        blob += "Messages by gender<p/>"
-        # blob += "<b>Warning:</b>Gender detection is manual and at risk for misgendering.  Please let @royrapoport know if you notice an error<p/>"
-        genders = sorted(self.gendercount.keys(), key=lambda x: self.gendercount[x])
-        total = 0
-        for gender in genders:
-            total += self.gendercount[gender]
+        if self.gender_report:
+          blob += "<td>"
+          blob += "Messages by gender<p/>"
+          # blob += "<b>Warning:</b>Gender detection is manual and at risk for misgendering.  Please let @royrapoport know if you notice an error<p/>"
+          genders = sorted(self.gendercount.keys(), key=lambda x: self.gendercount[x])
+          total = 0
+          for gender in genders:
+              total += self.gendercount[gender]
 
-        for gender in genders:
-            per = self.gendercount[gender] * 100.0 / total
-            blob += "{} ({:.1f}%) messages from authors identified as {}<p/>".format(self.gendercount[gender], per, gender)
-        blob += "<p/>"
-        if self.unknown:
-            blob += "Unknown authors: {}".format(self.unknown)
+          for gender in genders:
+              per = self.gendercount[gender] * 100.0 / total
+              blob += "{} ({:.1f}%) messages from authors identified as {}<p/>".format(self.gendercount[gender], per, gender)
+          blob += "<p/>"
+          if self.unknown:
+              blob += "Unknown authors: {}".format(self.unknown)
 
-        su = self.sorted_users
-        # figure out first female poster
-        users = [(position, x, self.get_gender(x)) for (position, x) in enumerate(su)]
-        female = [x for x in users if x[2] == "female"][0]
-        undetermined = [x for x in users if x[2] == "undetermined"][0]
+          su = self.sorted_users
+          # figure out first female poster
+          users = [(position, x, self.get_gender(x)) for (position, x) in enumerate(su)]
+          female = [x for x in users if x[2] == "female"][0]
+          undetermined = [x for x in users if x[2] == "undetermined"][0]
 
-        blob += "Highest-ranked female-gender poster: <b>{}</b>, rank {}<p/>".format(female[1], female[0])
-        blob += "Highest-ranked undetermined-gender poster: <b>{}</b>, rank {}".format(undetermined[1], undetermined[0])
-        blob += "</td>"
+          blob += "Highest-ranked female-gender poster: <b>{}</b>, rank {}<p/>".format(female[1], female[0])
+          blob += "Highest-ranked undetermined-gender poster: <b>{}</b>, rank {}".format(undetermined[1], undetermined[0])
+          blob += "</td>"
 
         blob += "</tr>"
         blob += "</table>"

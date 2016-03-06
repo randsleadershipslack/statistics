@@ -1,0 +1,4 @@
+# Name of your Slack -- just the aprt before '.slack.com'
+slack_name: rands-leadership
+# Report on statistics by gender
+gender_report: True
