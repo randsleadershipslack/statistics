@@ -131,6 +131,30 @@ class LastWeek(object):
         jinja_environment = jinja2.Environment(loader=jinja2.FileSystemLoader("."))
         self.template = jinja_environment.get_template("report.html")
 
+    def replace_id(self, cid):
+        """
+        Assuming either a #channelid or @personid, replace them with #channelname or @username
+        """
+        stripped = cid[1:]
+        first = cid[0]
+        if first == "#":
+            cname = self.channels_by_id[stripped]
+            return "#" + cname
+        elif first == "@":
+            uname = self.users[stripped]
+            return "@" + uname
+        return cid
+
+    def detokenize(self, message):
+        new = []
+        tokens = re.split("(<.*?>)", message)
+        for token in tokens:
+            if len(token) > 3 and token[0] == "<" and token[-1] == ">":
+                token = self.replace_id(token[1:-1])
+            new.append(token)
+        message = " ".join(new)
+        return message
+
     def get_channels(self):
         url = self.surl + "channels.list?exclude_archived=true&token={}".format(self.api_token)
         payload = self.retry(url)['channels']
@@ -491,7 +515,7 @@ class LastWeek(object):
             message = {}
             message['url'] = "https://rands-leadership.slack.com/arhives/{}/p{}".format(c, a)
             message['reaction_count'] = count
-            message['text'] = t
+            message['text'] = self.detokenize(t)
             message['author'] = u
             message['channel'] = c
             payload['reacted_messages'].append(message)
