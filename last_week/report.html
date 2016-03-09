@@ -257,17 +257,25 @@
                             ({{payload.male_gender_message_percentage}}%)
                             messages from authors identified as male<p/>
 
-                            {% if payload.unknown_authors %}
-                                New, unknown, authors: {{payload.unknown_authors}}<p/>
-                            {% endif %}
-
                             Highest ranked female-gender author:
                             <b>{{payload.highest_female_name}}</b>
                             rank {{payload.highest_female_rank}}<p/>
 
                             Highest ranked undetermined-gender author:
                             <b>{{payload.highest_undetermined_name}}</b>
-                            rank {{payload.highest_undetermined_rank}}
+                            rank {{payload.highest_undetermined_rank}}<p/>
+
+
+                            {% if payload.unknown_authors %}
+                                <hr/>
+                                New, unknown, authors:
+                                <ul>
+                                    {% for ua in payload.unknown_authors %}
+                                    <li>{{ua}}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+
                         </td>
                     </tr>
                 </tbody>
