@@ -186,99 +186,115 @@
             </table>
         </div>
         <p/>
-            <table border="1">
-                <tbody>
-                    <tr></tr>
-                    <tr>
-                        <td style="vertical-align: text-top;">
-                            <b>Messages Per Day</b><br/>
-                            <table border="1">
-                                <thead>
+        <table border="1">
+            <tbody>
+                <tr></tr>
+                <tr>
+                    <td style="vertical-align: text-top;">
+                        <b>Messages Per Day</b><br/>
+                        <table border="1">
+                            <thead>
+                                <tr>
+                                    <th>Day</th>
+                                    <th>Messages</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr></tr>
+                                {% for day in payload.days %}
                                     <tr>
-                                        <th>Day</th>
-                                        <th>Messages</th>
+                                        <td>{{day.name}}</td>
+                                        <td>{{day.count}}</td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    <tr></tr>
-                                    {% for day in payload.days %}
-                                        <tr>
-                                            <td>{{day.name}}</td>
-                                            <td>{{day.count}}</td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </td>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </td>
 
-                        <td style="vertical-align: text-top;">
-                            <b>Messages Per Hour</b><br/>
-                            <table border="1">
-                                <thead>
+                    <td style="vertical-align: text-top;">
+                        <b>Messages Per Hour</b><br/>
+                        <table border="1">
+                            <thead>
+                                <tr>
+                                    <th>Hour</th>
+                                    <th>Messages</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr></tr>
+                                {% for hour in payload.hours%}
                                     <tr>
-                                        <th>Hour</th>
-                                        <th>Messages</th>
+                                        <td>{{hour.name}}</td>
+                                        <td>{{hour.count}}</td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    <tr></tr>
-                                    {% for hour in payload.hours%}
-                                        <tr>
-                                            <td>{{hour.name}}</td>
-                                            <td>{{hour.count}}</td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </td>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </td>
 
-                        <td style="vertical-align: text-top;">
-                            <b>Most reacted-to messages:</b><br/>
-                            {% for message in payload.reacted_messages %}
-                                <a href="{{message.url}}">
-                                    {{message.reaction_count}} reactions
-                                </a>
-                                {{message.text}}
-                                by <b>{{message.author}}</b>
-                                in <b>{{message.channel}}</b><p/>
-                            {% endfor %}
-                        </td>
-                        <td style="vertical-align: text-top;">
-                            <b>Gender Statistics</b><p/>
-                            {{payload.undetermined_gender_message_count}}
-                            ({{payload.undetermined_gender_message_percentage}}%)
-                            messages from authors identified as undetermined<p/>
+                    <td style="vertical-align: text-top;">
+                        <b>Most reacted-to messages:</b><br/>
+                        {% for message in payload.reacted_messages %}
+                            <a href="{{message.url}}">
+                                {{message.reaction_count}} reactions
+                            </a>
+                            {{message.text}}
+                            by <b>{{message.author}}</b>
+                            in <b>{{message.channel}}</b><p/>
+                        {% endfor %}
+                    </td>
 
-                            {{payload.female_gender_message_count}}
-                            ({{payload.female_gender_message_percentage}}%)
-                            messages from authors identified as female<p/>
+                    <td style="vertical-align: text-top;">
+                        <b>Gender Statistics</b><p/>
+                        {{payload.undetermined_gender_message_count}}
+                        ({{payload.undetermined_gender_message_percentage}}%)
+                        messages from authors identified as undetermined<p/>
 
-                            {{payload.male_gender_message_count}}
-                            ({{payload.male_gender_message_percentage}}%)
-                            messages from authors identified as male<p/>
+                        {{payload.female_gender_message_count}}
+                        ({{payload.female_gender_message_percentage}}%)
+                        messages from authors identified as female<p/>
 
-                            Highest ranked female-gender author:
-                            <b>{{payload.highest_female_name}}</b>
-                            rank {{payload.highest_female_rank}}<p/>
+                        {{payload.male_gender_message_count}}
+                        ({{payload.male_gender_message_percentage}}%)
+                        messages from authors identified as male<p/>
 
-                            Highest ranked undetermined-gender author:
-                            <b>{{payload.highest_undetermined_name}}</b>
-                            rank {{payload.highest_undetermined_rank}}<p/>
+                        Highest ranked female-gender author:
+                        <b>{{payload.highest_female_name}}</b>
+                        rank {{payload.highest_female_rank}}<p/>
+
+                        Highest ranked undetermined-gender author:
+                        <b>{{payload.highest_undetermined_name}}</b>
+                        rank {{payload.highest_undetermined_rank}}<p/>
 
 
-                            {% if payload.unknown_authors %}
-                                <hr/>
-                                New, unknown, authors:
-                                <ul>
-                                    {% for ua in payload.unknown_authors %}
-                                    <li>{{ua}}</li>
-                                    {% endfor %}
-                                </ul>
-                            {% endif %}
+                        {% if payload.unknown_authors %}
+                            <hr/>
+                            New, unknown, authors:
+                            <ul>
+                                {% for ua in payload.unknown_authors %}
+                                <li>{{ua}}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
 
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                    </td>
+
+                    <td style="vertical-align: text-top;">
+                        <b>Stalins Deposed:</b><br/>
+                        <table border='1'>
+                            <tr>
+                                <td>Last week</td>
+                                <td>0</td>
+                            </tr>
+                            <tr>
+                                <td>Lifetime</td>
+                                <td>0</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p/>
     </body>
 </html>
