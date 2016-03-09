@@ -19,6 +19,7 @@ undetermined = [x.strip() for x in open("undetermined", "r").readlines()]
 
 genders = {'female': female, 'male': male, 'undetermined': undetermined}
 
+
 def asciify(text):
     text = ''.join([x for x in list(text) if ord(x) in range(128)])
     return text
@@ -33,6 +34,7 @@ def onlyemoji(m):
     t = re.sub(":[^:]+:", "", t)
     t = re.sub("\s+", "", t)
     return t == ""
+
 
 class PopReactions(object):
     messages = []
@@ -310,7 +312,7 @@ class LastWeek(object):
         self.gendercount = {}
         self.unknown = []
 
-        for hour in range(0,24):
+        for hour in range(0, 24):
             self.hours[hour] = 0
 
         for message in self.messages:
@@ -417,9 +419,6 @@ class LastWeek(object):
 
     def create_report(self):
 
-        with open('table.css', 'r') as myfile:
-            css = myfile.read().replace('\n', '')
-
         active = len(self.sorted_users)
         total = len(self.users.keys())
         per = (active * 100.0) / total
@@ -498,7 +497,7 @@ class LastWeek(object):
             # blob += "<td>{:.1f}</td>".format(self.reaction_percentage[author])
             pass
 
-        payload['days']= []
+        payload['days'] = []
         for day in self.dayidx:
             payload['days'].append({'name': day, 'count': self.days.get(day, 0)})
 
@@ -585,7 +584,6 @@ class LastWeek(object):
         f = open(json_fname, "wb")
         f.write(json.dumps(payload, indent=4))
         f.close()
-
 
         zf = zipfile.ZipFile(zip_fname, mode="w")
         zf.write(html_fname)
