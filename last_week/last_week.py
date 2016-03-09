@@ -513,7 +513,7 @@ class LastWeek(object):
             u = self.users[message['user']]
             c = message['channel']
             message = {}
-            message['url'] = "https://rands-leadership.slack.com/arhives/{}/p{}".format(c, a)
+            message['url'] = "https://rands-leadership.slack.com/archives/{}/p{}".format(c, a)
             message['reaction_count'] = count
             message['text'] = self.detokenize(t)
             message['author'] = u
