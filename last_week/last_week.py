@@ -562,7 +562,7 @@ class LastWeek(object):
             blob += "{} ({:.1f}%) messages from authors identified as {}<p/>".format(self.gendercount[gender], per, gender)
         blob += "<p/>"
         if self.unknown:
-            blob += "Unknown authors: {}".format(self.unknown)
+            blob += "Unknown authors: {}<p/>".format(self.unknown)
 
         su = self.sorted_users
         # figure out first female poster
