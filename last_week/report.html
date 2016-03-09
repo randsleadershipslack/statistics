@@ -135,18 +135,18 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td style="vertical-align: text-top;">
+                        <td>
                             <b>TOTAL</b>
                         </td>
-                        <td style="vertical-align: text-top;">
+                        <td>
                             <b>
-                                {{payload.total_messages}}<br/>
-                                {{payload.total_participants}}<br/>
-                                {{payload.messages_per_participant}}
+                                {{payload.total_messages}}m<br/>
+                                {{payload.total_participants}}p<br/>
+                                {{payload.messages_per_participant}} m/p
                             </b>
                         </td>
                         {% for user in payload.users %}
-                            <td>
+                            <td style="vertical-align: text-top;">
                                 {{user.messages}}<br/>
                                 {{user.percentage}}%<br/>
                                 {{user.cumpercentage}}%<br/>
