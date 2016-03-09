@@ -1,0 +1,276 @@
+<html>
+    <head>
+        <title>
+            Channel/User Activity {{payload.start_date}} to {{payload.end_date}}
+        </title>
+        <style media="screen" type="text/css">
+            .CSSTableGenerator {
+                margin:0px;padding:0px;
+                width:100%;	box-shadow: 10px 10px 5px #888888;
+                border:1px solid #000000;
+
+                -moz-border-radius-bottomleft:0px;
+                -webkit-border-bottom-left-radius:0px;
+                border-bottom-left-radius:0px;
+
+                -moz-border-radius-bottomright:0px;
+                -webkit-border-bottom-right-radius:0px;
+                border-bottom-right-radius:0px;
+
+                -moz-border-radius-topright:0px;
+                -webkit-border-top-right-radius:0px;
+                border-top-right-radius:0px;
+
+                -moz-border-radius-topleft:0px;
+                -webkit-border-top-left-radius:0px;
+                border-top-left-radius:0px;
+            }.CSSTableGenerator table{
+                width:100%;
+                height:100%;
+                margin:0px;padding:0px;
+            }.CSSTableGenerator tr:last-child td:last-child {
+                -moz-border-radius-bottomright:0px;
+                -webkit-border-bottom-right-radius:0px;
+                border-bottom-right-radius:0px;
+            }
+            .CSSTableGenerator table tr:first-child td:first-child {
+                -moz-border-radius-topleft:0px;
+                -webkit-border-top-left-radius:0px;
+                border-top-left-radius:0px;
+            }
+            .CSSTableGenerator table tr:first-child td:last-child {
+                -moz-border-radius-topright:0px;
+                -webkit-border-top-right-radius:0px;
+                border-top-right-radius:0px;
+            }.CSSTableGenerator tr:last-child td:first-child{
+                -moz-border-radius-bottomleft:0px;
+                -webkit-border-bottom-left-radius:0px;
+                border-bottom-left-radius:0px;
+            }.CSSTableGenerator tr:hover td{
+
+            }.CSSTableGenerator tr:nth-child(odd){ background-color:#e5e5e5; }
+            .CSSTableGenerator tr:nth-child(even)    { background-color:#ffffff; }
+            .CSSTableGenerator td{
+                vertical-align:middle;
+
+
+                border:1px solid #000000;
+                border-width:0px 1px 1px 0px;
+                text-align:left;
+                padding:7px;
+                font-size:10px;
+                font-family:arial;
+                font-weight:normal;
+                color:#000000;
+            }.CSSTableGenerator tr:last-child td{
+                border-width:0px 1px 0px 0px;
+            }.CSSTableGenerator tr td:last-child{
+                border-width:0px 0px 1px 0px;
+            }.CSSTableGenerator tr:last-child td:last-child{
+                border-width:0px 0px 0px 0px;
+            }
+            .CSSTableGenerator tr:first-child td{
+                background:-o-linear-gradient(bottom, #4c4c4c 5%, #000000 100%);	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #4c4c4c), color-stop(1, #000000) );	background:-moz-linear-gradient( center top, #4c4c4c 5%, #000000 100% );	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr="#4c4c4c", endColorstr="#000000");	background: -o-linear-gradient(top,#4c4c4c,000000);
+                background-color:#4c4c4c;
+                border:0px solid #000000;
+                text-align:center;
+                border-width:0px 0px 1px 1px;
+                font-size:14px;
+                font-family:arial;
+                font-weight:bold;
+                color:#ffffff;
+            }
+            .CSSTableGenerator tr:first-child:hover td{
+                background:-o-linear-gradient(bottom, #4c4c4c 5%, #000000 100%);	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #4c4c4c), color-stop(1, #000000) );	background:-moz-linear-gradient( center top, #4c4c4c 5%, #000000 100% );	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr="#4c4c4c", endColorstr="#000000");	background: -o-linear-gradient(top,#4c4c4c,000000);
+                background-color:#4c4c4c;
+            }
+            .CSSTableGenerator tr:first-child td:first-child{
+                border-width:0px 0px 1px 0px;
+            }
+            .CSSTableGenerator tr:first-child td:last-child{
+                border-width:0px 0px 1px 1px;
+            }
+        </style>
+    </head>
+    <body>
+        <h3><center>
+            Channel/User Activity {{payload.start_date}} to {{payload.end_date}}
+        </h3></center>
+
+        <b>Note:</b>Yellow-background channels are new this week<p/>
+
+        <b>{{payload.active_users}}/{{payload.total_users}}</b> (or {{payload.active_percentage}}%) users were active<p/>
+
+        <b>Median message count</b> was {{payload.median_messages}} messages<p/><p/>
+
+        For each user's total message cell, the first number is their total number of messages sent, the
+        second is the percent of total messages their messages represent, and the third is the running
+        percent of messages from all the people ahead of them plus theirs.<br/>for example, if the 2nd
+        person had 870, 3.5%, 7.8%, that means that they sent 870 messages; 870 messages represented
+        3.5% of total messages; and total messages from them and the #1 poster represented 7.8% of total
+        volume<p/>
+
+        <b>rphm</b> is reactions per 100 messages -- an indication of how many reactions your messages got on average<p/>
+
+        <b>wpm</b> is average words per message<p/>
+
+        numbers in parentheses after channel names are number of users in channel<p/>
+
+        <div class="CSSTableGenerator">
+            <table border='1'>
+                <thead>
+                    <tr>
+                        <td>
+                        </td>
+                        <td>
+                            <b>TOTAL</b>
+                        </td>
+                        {% for user in payload.users %}
+                            <td>
+                                {{user.rank}}
+                                <b>{{user.name}}</b>
+                            </td>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="vertical-align: text-top;">
+                            <b>TOTAL</b>
+                        </td>
+                        <td style="vertical-align: text-top;">
+                            <b>
+                                {{payload.total_messages}}<br/>
+                                {{payload.total_participants}}<br/>
+                                {{payload.messages_per_participant}}
+                            </b>
+                        </td>
+                        {% for user in payload.users %}
+                            <td>
+                                {{user.messages}}<br/>
+                                {{user.percentage}}%<br/>
+                                {{user.cumpercentage}}%<br/>
+                                {{user.rphm}} rphm<br/>
+                                {{user.wpm}} wpm
+                            </td>
+                        {% endfor %}
+                    </tr>
+                    {% for channel in payload.channels %}
+                        <tr>
+                            {% if channel.new %}
+                                <td bgcolor='#ffff00'>
+                            {% else %}
+                                <td>
+                            {% endif %}
+                                {{channel.rank}}
+                                <b>{{channel.name}}</b>
+                                ({{channel.members}})
+                            </td>
+                            <td>
+                                {{channel.messages}}m
+                                {{channel.participants}}p
+                                {{channel.messages_per_participant}} m/p
+                            </td>
+                            {% for user_message in channel.user_activity %}
+                                {% if user_message %}
+                                    <td bgcolor='#00FF00'>
+                                {% else %}
+                                    <td>
+                                {% endif %}
+                                    {{user_message}}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <p/>
+            <table border="1">
+                <tbody>
+                    <tr></tr>
+                    <tr>
+                        <td style="vertical-align: text-top;">
+                            <b>Messages Per Day</b><br/>
+                            <table border="1">
+                                <thead>
+                                    <tr>
+                                        <th>Day</th>
+                                        <th>Messages</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr></tr>
+                                    {% for day in payload.days %}
+                                        <tr>
+                                            <td>{{day.name}}</td>
+                                            <td>{{day.count}}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </td>
+
+                        <td style="vertical-align: text-top;">
+                            <b>Messages Per Hour</b><br/>
+                            <table border="1">
+                                <thead>
+                                    <tr>
+                                        <th>Hour</th>
+                                        <th>Messages</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr></tr>
+                                    {% for hour in payload.hours%}
+                                        <tr>
+                                            <td>{{hour.name}}</td>
+                                            <td>{{hour.count}}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </td>
+
+                        <td style="vertical-align: text-top;">
+                            <b>Most reacted-to messages:</b><br/>
+                            {% for message in payload.reacted_messages %}
+                                <a href="{{message.url}}">
+                                    {{message.reaction_count}} reactions
+                                </a>
+                                {{message.text}}
+                                by <b>{{message.author}}</b>
+                                in <b>{{message.channel}}</b><p/>
+                            {% endfor %}
+                        </td>
+                        <td style="vertical-align: text-top;">
+                            <b>Gender Statistics</b><p/>
+                            {{payload.undetermined_gender_message_count}}
+                            ({{payload.undetermined_gender_message_percentage}}%)
+                            messages from authors identified as undetermined<p/>
+
+                            {{payload.female_gender_message_count}}
+                            ({{payload.female_gender_message_percentage}}%)
+                            messages from authors identified as female<p/>
+
+                            {{payload.male_gender_message_count}}
+                            ({{payload.male_gender_message_percentage}}%)
+                            messages from authors identified as male<p/>
+
+                            {% if payload.unknown_authors %}
+                                New, unknown, authors: {{payload.unknown_authors}}<p/>
+                            {% endif %}
+
+                            Highest ranked female-gender author:
+                            <b>{{payload.highest_female_name}}</b>
+                            rank {{payload.highest_female_rank}}<p/>
+
+                            Highest ranked undetermined-gender author:
+                            <b>{{payload.highest_undetermined_name}}</b>
+                            rank {{payload.highest_undetermined_rank}}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+    </body>
+</html>

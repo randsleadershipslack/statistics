@@ -2,6 +2,7 @@
 
 import argparse
 import datetime
+import jinja2
 import json
 import os
 import re
@@ -127,6 +128,8 @@ class LastWeek(object):
             os.makedirs("output")
 
         self.pr = PopReactions(15)
+        jinja_environment = jinja2.Environment(loader=jinja2.FileSystemLoader("."))
+        self.template = jinja_environment.get_template("report.html")
 
     def get_channels(self):
         url = self.surl + "channels.list?exclude_archived=true&token={}".format(self.api_token)
@@ -393,45 +396,19 @@ class LastWeek(object):
         with open('table.css', 'r') as myfile:
             css = myfile.read().replace('\n', '')
 
-        blob = """
-        <html>
-            <head>
-                <title>
-                    Channel/User Activity {} to {}
-                </title>
-                <style media="screen" type="text/css">
-                  {}
-                </style>
-            </head>
-            <body>
-                <h3><center>
-                    Channel/User Activity {} to {}
-                </h3></center>
-            <b>Note:</b>Yellow-background channels are new this week<p/>
-        """
         active = len(self.sorted_users)
         total = len(self.users.keys())
         per = (active * 100.0) / total
         # Header row: users
-        blob = blob.format(self.start_date, self.end_date, css, self.start_date, self.end_date)
-        blob += "<b>{}/{}</b> (or {:.1f}%) users were active<p/>".format(active, total, per)
-        blob += "<b>Median message count</b> was {:.2f} messages<p/>".format(self.median_messages)
-        blob += "<p/>For each user's total message cell, the first number is their total "
-        blob += "number of messages sent, the second is the percent of total messages their "
-        blob += "messages represent, and the third is the running percent of messages "
-        blob += "from all the people ahead of them plus theirs."
-        blob += "<br/>"
-        blob += "for example, if the 2nd person had 870, 3.5%, 7.8%, that means that "
-        blob += "they sent 870 messages; 870 messages represented 3.5% of total messages; "
-        blob += "and total messages from them and the #1 poster represented 7.8% of total volume"
-        blob += "<p/><b>rphm</b> is reactions per 100 messages -- an indication of how many reactions your messages got on average"
-        blob += "<p/>"
-        blob += "<b>wpm</b> is average words per message<p/>"
-        blob += "numbers in parentheses after channel names are number of users in channel<p/>"
-        blob += '<div class="CSSTableGenerator">'
-        blob += "<table border='1'>"
-        blob += "<tr>"
-        blob += "<td></td><td><b>TOTAL</b></td>"
+
+        payload = {}
+        payload['start_date'] = self.start_date
+        payload['end_date'] = self.end_date
+        payload['active_users'] = active
+        payload['total_users'] = total
+        payload['active_percentage'] = "{:.1f}".format(per)
+        payload['median_messages'] = self.median_messages
+        payload['users'] = []
 
         total = 0
 
@@ -442,115 +419,83 @@ class LastWeek(object):
             cur = self.activity_by_user.get(su, {}).get("$total", 0)
             if cur != last:
                 idx = i + 1
-            blob += "<td>{} <b>{}</b></td>\n".format(idx, su)
             last_user = su
-        blob += "</tr>\n"
-        rows = []
+            payload['users'].append({'rank': idx, 'name': su})
+
+        payload['channels'] = []
         for idx, channel in enumerate(self.sorted_channels):
             activity = self.activity_by_channel[channel]
-            row = "<tr>"
-            if self.is_new(channel):
-                row += "<td bgcolor='#ffff00'>"
-            else:
-                row += "<td>"
             members = self.channels_by_name[channel]['num_members']
-            row += "{} <b>{}</b> ({})</td>".format(idx + 1, channel, members)
             participants = int(activity['$total'] / activity['$average'])
-            row += self.td("{}m {}p {:.1f}m/p".format(activity['$total'], participants, activity['$average']))
+            co = {'rank': idx + 1, 'name': channel, 'members': members}
+            co['messages'] = activity['$total']
+            co['participants'] = participants
+            co['messages_per_participant'] = "{:.1f}".format(activity['$average'])
+            co['user_activity'] = []
+            co['new'] = self.is_new(channel)
             total += activity['$total']
             for su in self.sorted_users:
                 value = self.activity_by_user[su].get(channel, "")
-                if value:
-                    row += "<td bgcolor='#00FF00'>"
-                else:
-                    row += "<td>"
-                row += str(value) + "</td>"
-            row += "</tr>\n"
-            rows.append(row)
-        blob += "<tr><td><b>TOTAL</b></td><td><b>"
-        blob += "{}m {}p {:.1f}m/p</b></td>".format(total, len(self.sorted_users), total * 1.0 / len(self.sorted_users))
+                co['user_activity'].append(value)
+            payload['channels'].append(co)
+
+        payload['total_messages'] = total
+        payload['total_participants'] = len(self.sorted_users)
+        payload['messages_per_participant'] = "{:.1f}".format(total * 1.0 / len(self.sorted_users))
+
         running = 0
         self.reaction_percentage = {}
-        for su in self.sorted_users:
-            blob += '<td style="vertical-align: text-top;">'
+        for user in payload['users']:
+            su = user['name']
             cur = self.activity_by_user[su]['$total']
-
             c = 0
             for v in self.reactions.get(su, {}).values():
                 c += v
             reaction_percentage = c * 100.0 / cur
+            self.reaction_percentage[su] = reaction_percentage
 
             running += cur
-            blob += "{}<br/>".format(cur)
             per = cur * 100.0 / total
-            blob += "{:.1f}%<br/>".format(per)
             per = (running * 100.0 / total)
             words = self.words[su]
             wpm = words / cur
-            blob += "{:.1f}%<br/>".format(per)
-            blob += "{:.1f} rphm<br/>".format(reaction_percentage)
-            blob += "{:.1f} wpm".format(wpm)
-            self.reaction_percentage[su] = reaction_percentage
-            blob += "</td>"
-        blob += "</tr>\n"
-        for row in rows:
-            blob += row
-        blob += "</table>\n"
-        blob += "</div>\n"
-        blob += "<p/>"
+            user['messages'] = cur
+            user['percentage'] = "{:.1f}".format(cur * 100.0 / total)
+            user['cumpercentage'] = "{:.1f}".format(running * 100.0 / total)
+            user['rphm'] = "{:.1f}".format(reaction_percentage)
+            user['wpm'] = "{:.1f}".format(wpm)
 
-        blob += "<table border='1'>"
-        blob += "<tr>"
-
-        blob += "<td>"
-        blob += "Top Authors by Reactions Per Hundred Messages (rphm)::<p/>"
-        blob += "<table border='1'><tr><td><b>Author</b></td><td><b>rphm</b></td></tr>\n"
         authors = self.reaction_percentage.keys()
         authors.sort(key=lambda x: self.reaction_percentage[x])
         authors.reverse()
         authors = authors[0:10]
         for author in authors:
-            blob += "<tr>"
-            blob += "<td>{}</td>".format(author)
-            blob += "<td>{:.1f}</td>".format(self.reaction_percentage[author])
-            blob += "</tr>"
-        blob += "</table><p/>"
-        blob += "</td>"
+            # blob += "<td>{}</td>".format(author)
+            # blob += "<td>{:.1f}</td>".format(self.reaction_percentage[author])
+            pass
 
-        blob += "<td>"
-        blob += "Messages by day:<p/>"
-        blob += "<table border='1'><tr><td><b>Day</b></td><td><b>Messages</b></td></tr>\n"
+        payload['days']= []
         for day in self.dayidx:
-            blob += "<tr>"
-            blob += "<td>{}</td>".format(day)
-            blob += "<td>{}</td>".format(self.days.get(day, 0))
-            blob += "</tr>"
-        blob += "</table><p/>"
-        blob += "</td>"
+            payload['days'].append({'name': day, 'count': self.days.get(day, 0)})
 
-        blob += "<td>"
-        blob += "Messages by hour:<p/>"
-        blob += "<table border='1'><tr><td><b>Hour</b></td><td><b>Messages</b></td></tr>\n"
+        payload['hours'] = []
         for hour in sorted(self.hours.keys()):
-            blob += "<tr>"
-            blob += "<td>{}</td>".format(hour)
-            blob += "<td>{}</td>".format(self.hours[hour])
-            blob += "</tr>"
-        blob += "</table><p/>"
-        blob += "</td>"
+            payload['hours'].append({'name': hour, 'count': self.hours[hour]})
 
-        blob += "<td>"
-        blob += "Most reacted-to messages<p/>"
+        payload['reacted_messages'] = []
         for message, count in self.popular_messages:
             a = message['ts'].replace(".", "")
             t = asciify(message['text'])
             u = self.users[message['user']]
             c = message['channel']
-            blob += '<b><a href="https://rands-leadership.slack.com/archives/{}/p{}">{} reactions</a></b> {} by <b>{}</b> in <b>{}</b><br/>'.format(c, a, count, t, u, c)
-        blob += "</td>"
+            message = {}
+            message['url'] = "https://rands-leadership.slack.com/arhives/{}/p{}".format(c, a)
+            message['reaction_count'] = count
+            message['text'] = t
+            message['author'] = u
+            message['channel'] = c
+            payload['reacted_messages'].append(message)
 
-        blob += "<td>"
-        blob += "Messages by gender<p/>"
         # blob += "<b>Warning:</b>Gender detection is manual and at risk for misgendering.  Please let @royrapoport know if you notice an error<p/>"
         genders = sorted(self.gendercount.keys(), key=lambda x: self.gendercount[x])
         total = 0
@@ -559,10 +504,10 @@ class LastWeek(object):
 
         for gender in genders:
             per = self.gendercount[gender] * 100.0 / total
-            blob += "{} ({:.1f}%) messages from authors identified as {}<p/>".format(self.gendercount[gender], per, gender)
-        blob += "<p/>"
-        if self.unknown:
-            blob += "Unknown authors: {}<p/>".format(self.unknown)
+            payload['{}_gender_message_count'.format(gender)] = self.gendercount[gender]
+            payload['{}_gender_message_percentage'.format(gender)] = "{:.1f}".format(per)
+
+        payload['unknown_authors'] = self.unknown
 
         su = self.sorted_users
         # figure out first female poster
@@ -575,19 +520,15 @@ class LastWeek(object):
             undetermined = undetermined[0]
 
         if female:
-            blob += "Highest-ranked female-gender poster: <b>{}</b>, rank {}<p/>".format(female[1], female[0])
+            payload['highest_female_name'] = female[1]
+            payload['highest_female_rank'] = female[0]
         if undetermined:
-            blob += "Highest-ranked undetermined-gender poster: <b>{}</b>, rank {}".format(undetermined[1], undetermined[0])
-        blob += "</td>"
+            payload['highest_undetermined_name'] = undetermined[1]
+            payload['highest_undetermined_rank'] = undetermined[0]
 
-        blob += "</tr>"
-        blob += "</table>"
+        report = self.template.render(payload=payload).encode("utf-8")
 
-
-        blob += "</body>\n"
-        blob += "</html>\n"
-
-        return blob
+        return report
 
     def upload(self, fname):
         cid = self.channels[self.upload_channel]
