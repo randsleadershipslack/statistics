@@ -361,7 +361,7 @@ class LastWeek(object):
                 if name not in reactions[user]:
                     reactions[user][name] = 0
                 reactions[user][name] += count
-                users = [self.users[uid] for uid in reaction['users']]
+                users = [self.users[u] for u in reaction['users']]
                 users = [x for x in users if x != user]
                 for user in users:
                     if user not in reactors_by_reaction:
