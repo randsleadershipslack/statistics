@@ -2,7 +2,6 @@
 
 import argparse
 import datetime
-import jinja2
 import json
 import os
 import re
@@ -11,6 +10,8 @@ import sys
 import time
 import zipfile
 
+import htmlmin
+import jinja2
 import requests
 
 male = [x.strip() for x in open("male", "r").readlines()]
@@ -132,6 +133,15 @@ class LastWeek(object):
         self.pr = PopReactions(15)
         jinja_environment = jinja2.Environment(loader=jinja2.FileSystemLoader("."))
         self.template = jinja_environment.get_template("report.html")
+
+    def minify(self, blob):
+        return htmlmin.minify(blob,
+                              remove_comments=True,
+                              remove_empty_space=True,
+                              remove_all_empty_space=True,
+                              reduce_boolean_attributes=True
+                              )
+
 
     def replace_id(self, cid):
         """
@@ -549,8 +559,9 @@ class LastWeek(object):
             payload['highest_undetermined_name'] = undetermined[1]
             payload['highest_undetermined_rank'] = undetermined[0]
 
-        report = self.template.render(payload=payload).encode("utf-8")
-
+        report = self.template.render(payload=payload)
+        # report = unicode(report)
+        report = self.minify(report)
         return report
 
     def upload(self, fname):
