@@ -557,10 +557,10 @@ class LastWeek(object):
 
         if female:
             payload['highest_female_name'] = female[1]
-            payload['highest_female_rank'] = female[0]
+            payload['highest_female_rank'] = female[0] + 1
         if undetermined:
             payload['highest_undetermined_name'] = undetermined[1]
-            payload['highest_undetermined_rank'] = undetermined[0]
+            payload['highest_undetermined_rank'] = undetermined[0] + 1
 
         report = self.template.render(payload=payload)
         report = self.minify(report)
