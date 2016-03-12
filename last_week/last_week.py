@@ -289,10 +289,12 @@ class LastWeek(object):
                 continue
             # print "Getting messages for {}".format(channel)
             cid = self.channels[channel]
+            s = time.time()
             cur_messages = self.get_messages(start, cid, end)
+            e = time.time()
             for message in cur_messages:
                 message['channel'] = channel
-            if len(cur_messages):
+            if len(cur_messages) and e - s > .5:
                 print "Got {} messages for {}".format(len(cur_messages), channel)
             messages += cur_messages
 
