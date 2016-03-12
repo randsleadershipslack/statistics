@@ -150,7 +150,10 @@ class LastWeek(object):
         stripped = cid[1:]
         first = cid[0]
         if first == "#":
-            cname = self.channels_by_id[stripped]
+            if stripped.find("|") != -1:
+                cid, cname = stripped.split("|")
+            else:
+                cname = self.channels_by_id[stripped]
             return "#" + cname
         elif first == "@":
             uname = self.users[stripped]
@@ -508,7 +511,7 @@ class LastWeek(object):
             pass
 
         payload['days'] = []
-        for day in self.dayidx:
+        for day in ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]:
             payload['days'].append({'name': day, 'count': self.days.get(day, 0)})
 
         payload['hours'] = []
@@ -560,7 +563,6 @@ class LastWeek(object):
             payload['highest_undetermined_rank'] = undetermined[0]
 
         report = self.template.render(payload=payload)
-        # report = unicode(report)
         report = self.minify(report)
         return report
 
