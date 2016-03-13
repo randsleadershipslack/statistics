@@ -13,7 +13,6 @@ user_ids = lw.users
 cache_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cache")
 
 files = os.listdir(cache_dir)
-print "Found {} files".format(len(files))
 
 users = {}
 
@@ -37,7 +36,7 @@ for fname in files:
             if ts < users[user_id]['ts']:
                 users[user_id] = payload
 
-    print "Processed {}".format(fqfn)
+    # print "Processed {}".format(fqfn)
 
 f = open("user_first_post.json", "w")
 f.write(json.dumps(users, indent=4))
