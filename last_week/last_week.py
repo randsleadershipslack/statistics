@@ -111,7 +111,7 @@ class LastWeek(object):
                 print "Failed to get {}: {}/{} ({} more attempts)".format(url, Exception, e, attempts)
         raise RuntimeError("failed to get {} many times".format(url))
 
-    def __init__(self, weeks_ago=0, debug=False, upload=True, cache=True):
+    def __init__(self, weeks_ago=0, debug=False, upload=True, cache=True, report=True):
 
         self.debug = debug
         self.weeks_ago = int(weeks_ago)
@@ -121,8 +121,11 @@ class LastWeek(object):
         self.get_channels()
         self.get_users()
         self.upload_flag = upload
+        self.report_flag = report
         if self.weeks_ago == -1:
             self.use_cache = False
+            self.upload_flag = False
+        if not self.report_flag:
             self.upload_flag = False
         # print "use_cache: {}".format(self.use_cache)
         if self.use_cache and not os.path.isdir("cache"):
@@ -302,7 +305,7 @@ class LastWeek(object):
 
         # Filter out messages with subtype (they're operational, like leaving/joining/setting topic)
         messages = [x for x in messages if x.get("subtype") is None]
-        # print "After filtering, got a total of {} messages for last week".format(len(messages))
+        print "After filtering, got a total of {} messages for last week".format(len(messages))
         self.messages = messages
 
     def get_gender(self, username):
@@ -312,6 +315,9 @@ class LastWeek(object):
         return "unknown"
 
     def create_aggregates(self):
+
+        if not self.messages:
+            return
 
         idx = {}
         words = {}
@@ -433,6 +439,8 @@ class LastWeek(object):
         return "<td>{}</td>".format(text)
 
     def create_report(self):
+        if not self.messages:
+            return
 
         active = len(self.sorted_users)
         total = len(self.users.keys())
@@ -575,6 +583,8 @@ class LastWeek(object):
         self.get_all_messages()
         self.create_aggregates()
         blob = self.create_report()
+        if not self.report_flag:
+            return
 
         fname = "output/activity_{}_to_{}".format(self.start_date, self.end_date)
         html_fname = fname + ".html"
@@ -666,9 +676,11 @@ if __name__ == "__main__":
     parser.add_argument("--week", type=int, default=0)
     parser.add_argument("--noupload", action="store_true")
     parser.add_argument("--nocache", action="store_true")
+    parser.add_argument("--noreport", action="store_true")
     args = parser.parse_args()
     upload = not args.noupload
-    print "upload: {}".format(upload)
+    report = not args.noreport
     cache = not args.nocache
-    lw = LastWeek(weeks_ago=args.week, debug=args.debug, upload=upload, cache=cache)
+    print "upload: {}".format(upload)
+    lw = LastWeek(weeks_ago=args.week, debug=args.debug, upload=upload, cache=cache, report=report)
     lw.run()
