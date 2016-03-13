@@ -452,6 +452,7 @@ class LastWeek(object):
 
         idx = 0
         last_user = None
+        self.rank = {}
         for i, su in enumerate(self.sorted_users):
             last = self.activity_by_user.get(last_user, {}).get("$total", 0)
             cur = self.activity_by_user.get(su, {}).get("$total", 0)
@@ -459,6 +460,7 @@ class LastWeek(object):
                 idx = i + 1
             last_user = su
             payload['users'].append({'rank': idx, 'name': su})
+            self.rank[su] = idx
 
         payload['channels'] = []
         for idx, channel in enumerate(self.sorted_channels):
@@ -549,20 +551,20 @@ class LastWeek(object):
 
         su = self.sorted_users
         # figure out first female poster
-        users = [(position, x, self.get_gender(x)) for (position, x) in enumerate(su)]
-        female = [x for x in users if x[2] == "female"]
+        users = [(x, self.get_gender(x)) for x in su]
+        female = [x for x in users if x[1] == "female"]
         if female:
             female = female[0]
-        undetermined = [x for x in users if x[2] == "undetermined"]
+        undetermined = [x for x in users if x[1] == "undetermined"]
         if undetermined:
             undetermined = undetermined[0]
 
         if female:
-            payload['highest_female_name'] = female[1]
-            payload['highest_female_rank'] = female[0] + 1
+            payload['highest_female_name'] = female[0]
+            payload['highest_female_rank'] = self.rank[female[0]]
         if undetermined:
-            payload['highest_undetermined_name'] = undetermined[1]
-            payload['highest_undetermined_rank'] = undetermined[0] + 1
+            payload['highest_undetermined_name'] = undetermined[0]
+            payload['highest_undetermined_rank'] = self.rank[undetermined[0]]
 
         self.payload = payload
         report = self.template.render(payload=payload)
