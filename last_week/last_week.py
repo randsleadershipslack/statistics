@@ -549,22 +549,14 @@ class LastWeek(object):
 
         payload['unknown_authors'] = self.unknown
 
-        su = self.sorted_users
-        # figure out first female poster
-        users = [(x, self.get_gender(x)) for x in su]
-        female = [x for x in users if x[1] == "female"]
-        if female:
-            female = female[0]
-        undetermined = [x for x in users if x[1] == "undetermined"]
-        if undetermined:
-            undetermined = undetermined[0]
+        users = [(x, self.get_gender(x)) for x in self.sorted_users]
 
-        if female:
-            payload['highest_female_name'] = female[0]
-            payload['highest_female_rank'] = self.rank[female[0]]
-        if undetermined:
-            payload['highest_undetermined_name'] = undetermined[0]
-            payload['highest_undetermined_rank'] = self.rank[undetermined[0]]
+        for label in ["female", "undetermined"]:
+            authors = [x for x in users if x[1] == label]
+            if authors:
+                top_author = authors[0][0]
+                payload['highest_{}_name'.format(label)] = top_author
+                payload['highest_{}_rank'.format(label)] = self.rank[top_author]
 
         self.payload = payload
         report = self.template.render(payload=payload)
