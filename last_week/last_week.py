@@ -52,7 +52,7 @@ class PopReactions(object):
         self.messages.append([message, count])
         self.counter += 1
         if count > self.max_reactions:
-            print "Found new max count: {}".format(count)
+            # print "Found new max count: {}".format(count)
             self.max_reactions = count
         self.prune()
 
@@ -124,7 +124,7 @@ class LastWeek(object):
         if self.weeks_ago == -1:
             self.use_cache = False
             self.upload_flag = False
-        print "use_cache: {}".format(self.use_cache)
+        # print "use_cache: {}".format(self.use_cache)
         if self.use_cache and not os.path.isdir("cache"):
             os.makedirs("cache")
         if not os.path.isdir("output"):
@@ -240,7 +240,7 @@ class LastWeek(object):
         lweek = time.time() - 86400 * 7
         lweek_lt = time.localtime(lweek)
         wday = lweek_lt.tm_wday
-        print "wday: {}".format(wday)
+        # print "wday: {}".format(wday)
         d = 1
         if wday == 6:
             wday = 0
@@ -298,11 +298,11 @@ class LastWeek(object):
                 print "Got {} messages for {}".format(len(cur_messages), channel)
             messages += cur_messages
 
-        print "Got a total of {} messages for last week".format(len(messages))
+        # print "Got a total of {} messages for last week".format(len(messages))
 
         # Filter out messages with subtype (they're operational, like leaving/joining/setting topic)
         messages = [x for x in messages if x.get("subtype") is None]
-        print "After filtering, got a total of {} messages for last week".format(len(messages))
+        # print "After filtering, got a total of {} messages for last week".format(len(messages))
         self.messages = messages
 
     def get_gender(self, username):
@@ -390,7 +390,7 @@ class LastWeek(object):
                     reactors_by_reaction[user][name] += 1
                     reactors_by_count[user] += 1
             self.pr.push(message, tot_reactions)
-        print "pureemoji is {}".format(pureemoji)
+        # print "pureemoji is {}".format(pureemoji)
 
         self.pr.prune(force=True)
         self.popular_messages = self.pr.messages
@@ -564,6 +564,7 @@ class LastWeek(object):
             payload['highest_undetermined_name'] = undetermined[1]
             payload['highest_undetermined_rank'] = undetermined[0] + 1
 
+        self.payload = payload
         report = self.template.render(payload=payload)
         report = self.minify(report)
         return report
@@ -579,7 +580,6 @@ class LastWeek(object):
     def run(self):
         self.get_all_messages()
         self.create_aggregates()
-
         blob = self.create_report()
 
         fname = "output/activity_{}_to_{}".format(self.start_date, self.end_date)
