@@ -32,7 +32,7 @@ def comparator(pretty, key, lp, pp, show_percent=True, is_percent=False):
         per = -1 * per
         verb = "dropped"
     else:
-        verb = "rose "
+        verb = "rose"
     if is_percent:
         ps = "{}%".format(ps)
         ls = "{}%".format(ls)
