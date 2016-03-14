@@ -56,6 +56,15 @@ second = pp['users'][1]
 print m.format(first['name'], first['messages'], second['name'], second['messages'])
 print ""
 
+channels = lp['channels']
+new = [x for x in channels if x['new']]
+if new:
+    print "New channels created this week include:"
+    for i in new:
+        print " * {}".format(i['name'])
+    print ""
+
+
 comparator("active users", "active_users", lp, pp)
 comparator("total messages", "total_messages", lp, pp)
 comparator("messages from undetermined-gender posters", "undetermined_gender_message_count", lp, pp)
