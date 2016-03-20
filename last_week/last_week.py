@@ -267,8 +267,8 @@ class LastWeek(object):
         self.end_date = "{}-{:02d}-{:02d} {:02d}:{:02d}".format(end_dt.year, end_dt.month, end_dt.day, end_dt.hour, end_dt.minute)
         self.start_date = "{}-{:02d}-{:02d}".format(start_dt.year, start_dt.month, start_dt.day)
         self.end_date = "{}-{:02d}-{:02d}".format(end_dt.year, end_dt.month, end_dt.day)
-        print "start: {}".format(self.start_date)
-        print "end: {}".format(self.end_date)
+        # print "start: {}".format(self.start_date)
+        # print "end: {}".format(self.end_date)
         # sys.exit(0)
         self.start = start
         self.end = end
@@ -305,7 +305,7 @@ class LastWeek(object):
 
         # Filter out messages with subtype (they're operational, like leaving/joining/setting topic)
         messages = [x for x in messages if x.get("subtype") is None]
-        print "After filtering, got a total of {} messages for last week".format(len(messages))
+        # print "After filtering, got a total of {} messages for last week".format(len(messages))
         self.messages = messages
 
     def get_gender(self, username):
