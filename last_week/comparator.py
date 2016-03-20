@@ -61,7 +61,7 @@ new = [x for x in channels if x['new']]
 if new:
     print "New channels created this week include:"
     for i in new:
-        print " * {}".format(i['name'])
+        print " * #{}".format(i['name'])
     print ""
 
 
