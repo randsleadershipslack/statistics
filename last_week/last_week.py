@@ -159,7 +159,10 @@ class LastWeek(object):
                 cname = self.channels_by_id[stripped]
             return "#" + cname
         elif first == "@":
-            uname = self.users[stripped]
+            if stripped.find("|") != -1:
+                uid, uname = stripped.split("|")
+            else:
+                uname = self.users[stripped]
             return "@" + uname
         return cid
 
