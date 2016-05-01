@@ -27,6 +27,10 @@ def comparator(pretty, key, lp, pp, show_percent=True, is_percent=False):
     m = "We had {} {} vs {} the week before, a change of {:.1f}%"
     ls = float(lp[key])
     ps = float(pp[key])
+    if ls == ps:
+        m = "{} remained the same at {}".format(pretty, ps)
+        print m
+        return
     per = ls * 100.0 / ps - 100
     if per < 0:
         per = -1 * per
