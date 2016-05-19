@@ -111,7 +111,7 @@ class LastWeek(object):
                 print "Failed to get {}: {}/{} ({} more attempts)".format(url, Exception, e, attempts)
         raise RuntimeError("failed to get {} many times".format(url))
 
-    def __init__(self, weeks_ago=0, debug=False, upload=True, cache=True, report=True):
+    def __init__(self, weeks_ago=0, debug=False, upload=False, cache=True, report=True):
 
         self.debug = debug
         self.weeks_ago = int(weeks_ago)
@@ -677,11 +677,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Process some integers.')
     parser.add_argument("--debug", action="store_true")
     parser.add_argument("--week", type=int, default=0)
-    parser.add_argument("--noupload", action="store_true")
+    parser.add_argument("--upload", action="store_true")
     parser.add_argument("--nocache", action="store_true")
     parser.add_argument("--noreport", action="store_true")
     args = parser.parse_args()
-    upload = not args.noupload
+    upload = args.upload
     report = not args.noreport
     cache = not args.nocache
     print "upload: {}".format(upload)
