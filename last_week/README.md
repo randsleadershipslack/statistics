@@ -17,5 +17,5 @@ You'll need to have API_TOKEN env variable set for a Slack API token, which you 
 Install all required python packages:
 
 ```bash
-> sudo easy_install Jinja2 requests htmlmin
+> pip install -r requirements.txt
 ```
