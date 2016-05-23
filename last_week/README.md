@@ -12,10 +12,19 @@ You'll need to have API_TOKEN env variable set for a Slack API token, which you 
 > env API_TOKEN=<YOUR_SECRET_API_TOKEN> ./last_week.py --upload
 ```
 
-## Setup/Install
+## Setup/Install locally
 
 Install all required python packages:
 
 ```bash
 > pip install -r requirements.txt
+```
+## Run in docker
+Build the docker image:
+``` bash
+> docker build -t rands_stats .
+```
+Run the docker image:
+``` bash
+> docker run -e API_TOKEN=YOUR_SECRET_API_TOKEN -it rands_stats:latest /opt/lastweek.py --upload
 ```
