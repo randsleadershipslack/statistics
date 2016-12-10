@@ -10,8 +10,6 @@ import sys
 import time
 import zipfile
 
-import htmlmin
-import jinja2
 import requests
 
 male = [x.strip() for x in open("male", "r").readlines()]
@@ -134,17 +132,19 @@ class LastWeek(object):
             os.makedirs("output")
 
         self.pr = PopReactions(15)
-        jinja_environment = jinja2.Environment(loader=jinja2.FileSystemLoader("."))
-        self.template = jinja_environment.get_template("report.html")
+        if produceHTML:
+            import jinja2
+            jinja_environment = jinja2.Environment(loader=jinja2.FileSystemLoader("."))
+            self.template = jinja_environment.get_template("report.html")
 
     def minify(self, blob):
+        import htmlmin
         return htmlmin.minify(blob,
                               remove_comments=True,
                               remove_empty_space=True,
                               remove_all_empty_space=True,
                               reduce_boolean_attributes=True
                               )
-
 
     def replace_id(self, cid):
         """
@@ -585,7 +585,7 @@ class LastWeek(object):
     def run(self):
         self.get_all_messages()
         self.create_aggregates()
-        blob = self.create_report()
+
         if not self.report_flag:
             return
 
@@ -594,9 +594,13 @@ class LastWeek(object):
         zip_fname = fname + ".zip"
         json_fname = fname + ".json"
 
-        f = open(html_fname, "w")
-        f.write(blob)
-        f.close()
+        if produceHTML:
+            blob = self.create_report()
+            f = open(html_fname, "w")
+            f.write(blob)
+            f.close()
+            if openBrowser:
+                subprocess.call(["/usr/bin/open", html_fname])
 
         payload = {
             'start': self.start_date,
@@ -608,7 +612,8 @@ class LastWeek(object):
         f.close()
 
         zf = zipfile.ZipFile(zip_fname, mode="w")
-        zf.write(html_fname)
+        if produceHTML:
+            zf.write(html_fname)
         zf.write(json_fname)
         zf.close()
 
@@ -669,20 +674,21 @@ class LastWeek(object):
         for idx, reaction in enumerate(reactions[0:11]):
             print "{} {} :{}:".format(idx, self.recount[reaction], reaction)
 
-        subprocess.call(["/usr/bin/open", html_fname])
-
-
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Process some integers.')
     parser.add_argument("--debug", action="store_true")
-    parser.add_argument("--week", type=int, default=0)
-    parser.add_argument("--upload", action="store_true")
-    parser.add_argument("--nocache", action="store_true")
-    parser.add_argument("--noreport", action="store_true")
+    parser.add_argument("--week", type=int, default=0, help="Fetch messages from n weeks ago, default 0")
+    parser.add_argument("--upload", action="store_true", help="Upload results back into the slack, default FALSE")
+    parser.add_argument("--nocache", action="store_true", help="Don't cache downloaded messages")
+    parser.add_argument("--noreport", action="store_true", help="Don't produce summary reports")
+    parser.add_argument("--nohtml", action="store_true", help="Produce summary figures as json, skip HTML output")
+    parser.add_argument("--nobrowser", action="store_true", help="Don't open browser with HTML report")
     args = parser.parse_args()
     upload = args.upload
     report = not args.noreport
+    produceHTML = not args.nohtml
+    openBrowser = not args.nobrowser
     cache = not args.nocache
     print "upload: {}".format(upload)
     lw = LastWeek(weeks_ago=args.week, debug=args.debug, upload=upload, cache=cache, report=report)
