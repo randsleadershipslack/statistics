@@ -132,7 +132,7 @@ class LastWeek(object):
             os.makedirs("output")
 
         self.pr = PopReactions(15)
-        if produceHTML:
+        if produce_html:
             import jinja2
             jinja_environment = jinja2.Environment(loader=jinja2.FileSystemLoader("."))
             self.template = jinja_environment.get_template("report.html")
@@ -594,12 +594,12 @@ class LastWeek(object):
         zip_fname = fname + ".zip"
         json_fname = fname + ".json"
 
-        if produceHTML:
+        if produce_html:
             blob = self.create_report()
             f = open(html_fname, "w")
             f.write(blob)
             f.close()
-            if openBrowser:
+            if open_browser:
                 subprocess.call(["/usr/bin/open", html_fname])
 
         payload = {
@@ -612,7 +612,7 @@ class LastWeek(object):
         f.close()
 
         zf = zipfile.ZipFile(zip_fname, mode="w")
-        if produceHTML:
+        if produce_html:
             zf.write(html_fname)
         zf.write(json_fname)
         zf.close()
@@ -687,8 +687,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     upload = args.upload
     report = not args.noreport
-    produceHTML = not args.nohtml
-    openBrowser = not args.nobrowser
+    produce_html = not args.nohtml
+    open_browser = not args.nobrowser
     cache = not args.nocache
     print "upload: {}".format(upload)
     lw = LastWeek(weeks_ago=args.week, debug=args.debug, upload=upload, cache=cache, report=report)
