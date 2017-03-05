@@ -109,7 +109,7 @@ class LastWeek(object):
                 print "Failed to get {}: {}/{} ({} more attempts)".format(url, Exception, e, attempts)
         raise RuntimeError("failed to get {} many times".format(url))
 
-    def __init__(self, weeks_ago=0, debug=False, upload=False, cache=True, report=True):
+    def __init__(self, weeks_ago=0, debug=False, upload=False, produce_html=True, cache=True, report=True):
 
         self.debug = debug
         self.weeks_ago = int(weeks_ago)
@@ -119,6 +119,7 @@ class LastWeek(object):
         self.get_channels()
         self.get_users()
         self.upload_flag = upload
+        self.produce_html = produce_html
         self.report_flag = report
         if self.weeks_ago == -1:
             self.use_cache = False
@@ -132,7 +133,7 @@ class LastWeek(object):
             os.makedirs("output")
 
         self.pr = PopReactions(15)
-        if produce_html:
+        if self.produce_html:
             import jinja2
             jinja_environment = jinja2.Environment(loader=jinja2.FileSystemLoader("."))
             self.template = jinja_environment.get_template("report.html")
@@ -569,7 +570,6 @@ class LastWeek(object):
                 payload['highest_{}_name'.format(label)] = top_author
                 payload['highest_{}_rank'.format(label)] = self.rank[top_author]
 
-        self.payload = payload
         report = self.template.render(payload=payload)
         report = self.minify(report)
         return report
@@ -586,6 +586,13 @@ class LastWeek(object):
         self.get_all_messages()
         self.create_aggregates()
 
+        payload = {
+            'start': self.start_date,
+            'end': self.end_date,
+            'statistics': self.activity_by_channel
+        }
+        self.payload = payload
+
         if not self.report_flag:
             return
 
@@ -594,7 +601,7 @@ class LastWeek(object):
         zip_fname = fname + ".zip"
         json_fname = fname + ".json"
 
-        if produce_html:
+        if self.produce_html:
             blob = self.create_report()
             f = open(html_fname, "w")
             f.write(blob)
@@ -602,17 +609,12 @@ class LastWeek(object):
             if open_browser:
                 subprocess.call(["/usr/bin/open", html_fname])
 
-        payload = {
-            'start': self.start_date,
-            'end': self.end_date,
-            'statistics': self.activity_by_channel
-        }
         f = open(json_fname, "wb")
         f.write(json.dumps(payload, indent=4))
         f.close()
 
         zf = zipfile.ZipFile(zip_fname, mode="w")
-        if produce_html:
+        if self.produce_html:
             zf.write(html_fname)
         zf.write(json_fname)
         zf.close()
@@ -691,5 +693,5 @@ if __name__ == "__main__":
     open_browser = not args.nobrowser
     cache = not args.nocache
     print "upload: {}".format(upload)
-    lw = LastWeek(weeks_ago=args.week, debug=args.debug, upload=upload, cache=cache, report=report)
+    lw = LastWeek(weeks_ago=args.week, debug=args.debug, upload=upload, cache=cache, produce_html=produce_html, report=report)
     lw.run()
