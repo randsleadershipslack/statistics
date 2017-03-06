@@ -200,6 +200,7 @@ class LastWeek(object):
         payload = self.retry(url)['members']
         self.user_payload = payload
         self.users = {x['id']: x['name'] for x in payload}
+        self.users_real_name = {x['name']: x.get("real_name", "") for x in payload}
 
     def get_fname(self, oldest, cid, latest):
         fname = "cache/messages_{}_{}_{}".format(oldest, cid, latest)
@@ -559,7 +560,7 @@ class LastWeek(object):
             payload['{}_gender_message_count'.format(gender)] = self.gendercount[gender]
             payload['{}_gender_message_percentage'.format(gender)] = "{:.1f}".format(per)
 
-        payload['unknown_authors'] = self.unknown
+        payload['unknown_authors'] = ["{} ({})".format(x, self.users_real_name[x]) for x in sorted(self.unknown)]
 
         users = [(x, self.get_gender(x)) for x in self.sorted_users]
 
