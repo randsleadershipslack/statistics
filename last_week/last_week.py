@@ -560,7 +560,7 @@ class LastWeek(object):
             payload['{}_gender_message_count'.format(gender)] = self.gendercount[gender]
             payload['{}_gender_message_percentage'.format(gender)] = "{:.1f}".format(per)
 
-        payload['unknown_authors'] = ["{} ({})".format(x, self.users_real_name[x]) for x in sorted(self.unknown)]
+        payload['unknown_authors'] = [u"{} ({})".format(x, self.users_real_name[x]) for x in sorted(self.unknown)]
 
         users = [(x, self.get_gender(x)) for x in self.sorted_users]
 
@@ -605,7 +605,7 @@ class LastWeek(object):
         if self.produce_html:
             blob = self.create_report()
             f = open(html_fname, "w")
-            f.write(blob)
+            f.write(blob.encode("utf8"))
             f.close()
             if open_browser:
                 subprocess.call(["/usr/bin/open", html_fname])
