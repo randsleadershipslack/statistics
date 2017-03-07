@@ -563,6 +563,16 @@ class LastWeek(object):
         payload['unknown_authors'] = [u"{} ({})".format(x, self.users_real_name[x]) for x in sorted(self.unknown)]
 
         users = [(x, self.get_gender(x)) for x in self.sorted_users]
+        total_authors = len(users)
+        female_authors = len([x for x in users if x[1] == "female"])
+        undetermined_authors = len([x for x in users if x[1] == "undetermined"])
+        male_authors = total_authors - (female_authors + undetermined_authors)
+        female_percent = "{:.1f}%".format((female_authors * 100.0) / total_authors)
+        undetermined_percent = "{:.1f}%".format((undetermined_authors * 100.0) / total_authors)
+        male_percent = "{:.1f}%".format((male_authors * 100.0) / total_authors)
+        payload['female_authors_percent'] = female_percent
+        payload['undetermined_authors_percent'] = undetermined_percent
+        payload['male_authors_percent'] = male_percent
 
         for label in ["female", "undetermined"]:
             authors = [x for x in users if x[1] == label]
