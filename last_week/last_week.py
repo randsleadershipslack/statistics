@@ -582,6 +582,7 @@ class LastWeek(object):
                 payload['highest_{}_rank'.format(label)] = self.rank[top_author]
 
         report = self.template.render(payload=payload)
+        self.payload = payload
         report = self.minify(report)
         return report
 
