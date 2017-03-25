@@ -498,7 +498,9 @@ class LastWeek(object):
 
         running = 0
         self.reaction_percentage = {}
+        ctr = 0
         for user in payload['users']:
+            ctr += 1
             su = user['name']
             cur = self.activity_by_user[su]['$total']
             c = 0
@@ -514,7 +516,12 @@ class LastWeek(object):
             wpm = words / cur
             user['messages'] = cur
             user['percentage'] = "{:.1f}".format(cur * 100.0 / total)
-            user['cumpercentage'] = "{:.1f}".format(running * 100.0 / total)
+            cumpercentage = (running * 100.0 / total)
+            if ctr == 10:
+                payload['topten'] = "{:.1f}%".format(cumpercentage)
+            if cumpercentage >= 50.0 and 'fifty' not in payload:
+                payload['fifty'] = ctr - 1
+            user['cumpercentage'] = "{:.1f}".format(cumpercentage)
             user['rphm'] = "{:.1f}".format(reaction_percentage)
             user['wpm'] = "{:.1f}".format(wpm)
 
