@@ -374,6 +374,8 @@ class LastWeek(object):
             activity_by_channel[channel][user] = activity_by_channel[channel].get(user, 0) + 1
             activity_by_user[user][channel] = activity_by_user[user].get(channel, 0) + 1
             mreactions = message.get("reactions", [])
+            if channel == "intros":
+                continue
             tot_reactions = 0
             for reaction in mreactions:
                 name = reaction['name']
