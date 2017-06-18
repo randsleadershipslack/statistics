@@ -281,6 +281,8 @@ class LastWeek(object):
 
     def get_all_messages(self):
         start, end = self.last_week()
+        if self.weeks_ago > 0:
+            print "Getting messages from {} to {}".format(self.start_date, self.end_date)
 
         messages = []
         channels = self.channels
