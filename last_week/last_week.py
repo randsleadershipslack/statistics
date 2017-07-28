@@ -99,12 +99,20 @@ class LastWeek(object):
 
     def retry(self, url, attempts=3):
 
+        pause = 1.5
+        increment = 2
         while attempts:
             try:
                 req = requests.get(url)
                 j = req.json()
+                if 'ok' in j and not j['ok']:
+                    if j.get("error") == "ratelimited":
+                        pause += increment
+                        print "Increasing pause time to {}".format(pause)
+                    raise RuntimeError("Failed to get payload: {}".format(j))
                 return j
             except Exception, e:
+                time.sleep(pause)
                 attempts -= 1
                 print "Failed to get {}: {}/{} ({} more attempts)".format(url, Exception, e, attempts)
         raise RuntimeError("failed to get {} many times".format(url))
@@ -197,10 +205,14 @@ class LastWeek(object):
 
     def get_users(self):
         url = self.surl + "users.list?token=" + self.api_token
-        payload = self.retry(url)['members']
-        self.user_payload = payload
-        self.users = {x['id']: x['name'] for x in payload}
-        self.users_real_name = {x['name']: x.get("real_name", "") for x in payload}
+        payload = self.retry(url)
+        try:
+            members = payload['members']
+        except:
+            raise RuntimeError("payload: {}".format(payload))
+        self.user_payload = members
+        self.users = {x['id']: x['name'] for x in members}
+        self.users_real_name = {x['name']: x.get("real_name", "") for x in members}
 
     def get_fname(self, oldest, cid, latest):
         fname = "cache/messages_{}_{}_{}".format(oldest, cid, latest)
@@ -226,8 +238,11 @@ class LastWeek(object):
                 murl += "&latest={}".format(time.time())
             # print "murl: {}".format(murl)
             payload = self.retry(murl)
-            messages += payload['messages']
-            if payload['has_more'] is False:
+            try:
+                messages += payload['messages']
+            except:
+                print "Payload: {}".format(payload)
+            if not payload.get("has_more"):
                 done = True
                 continue
             ts = [float(x['ts']) for x in messages]
@@ -608,13 +623,14 @@ class LastWeek(object):
     def run(self):
         self.get_all_messages()
         self.create_aggregates()
+        blob = self.create_report()
 
-        payload = {
-            'start': self.start_date,
-            'end': self.end_date,
-            'statistics': self.activity_by_channel
-        }
-        self.payload = payload
+        # payload = {
+        #    'start': self.start_date,
+        #    'end': self.end_date,
+        #    'statistics': self.activity_by_channel
+        #}
+        #self.payload = payload
 
         if not self.report_flag:
             return
@@ -625,7 +641,6 @@ class LastWeek(object):
         json_fname = fname + ".json"
 
         if self.produce_html:
-            blob = self.create_report()
             f = open(html_fname, "w")
             f.write(blob.encode("utf8"))
             f.close()
@@ -633,7 +648,7 @@ class LastWeek(object):
                 subprocess.call(["/usr/bin/open", html_fname])
 
         f = open(json_fname, "wb")
-        f.write(json.dumps(payload, indent=4))
+        f.write(json.dumps(self.payload, indent=4))
         f.close()
 
         zf = zipfile.ZipFile(zip_fname, mode="w")
