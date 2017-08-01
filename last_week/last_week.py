@@ -125,6 +125,7 @@ class LastWeek(object):
         self.use_cache = cache
         self.api_token = os.getenv("API_TOKEN")
         self.get_channels()
+        self.payload = {}
         self.get_users()
         self.upload_flag = upload
         self.produce_html = produce_html
@@ -623,7 +624,7 @@ class LastWeek(object):
     def run(self):
         self.get_all_messages()
         self.create_aggregates()
-        blob = self.create_report()
+        blob = self.create_report() or ""
 
         # payload = {
         #    'start': self.start_date,
