@@ -25,7 +25,7 @@ def asciify(text):
 
 
 def index(m):
-    return "{}{}{}".format(asciify(m['text']), m['user'], m['channel'])
+    return "{}{}{}".format(asciify(m['text']), asciify(m['user']), asciify(m['channel']))
 
 
 def onlyemoji(m):
