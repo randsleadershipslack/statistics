@@ -99,12 +99,20 @@ class LastWeek(object):
 
     def retry(self, url, attempts=3):
 
+        pause = 1.5
+        increment = 2
         while attempts:
             try:
                 req = requests.get(url)
                 j = req.json()
+                if 'ok' in j and not j['ok']:
+                    if j.get("error") == "ratelimited":
+                        pause += increment
+                        print "Increasing pause time to {}".format(pause)
+                    raise RuntimeError("Failed to get payload: {}".format(j))
                 return j
             except Exception, e:
+                time.sleep(pause)
                 attempts -= 1
                 print "Failed to get {}: {}/{} ({} more attempts)".format(url, Exception, e, attempts)
         raise RuntimeError("failed to get {} many times".format(url))
