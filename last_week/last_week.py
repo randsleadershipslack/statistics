@@ -20,12 +20,13 @@ genders = {'female': female, 'male': male, 'undetermined': undetermined}
 
 
 def asciify(text):
-    text = ''.join([x for x in list(text) if ord(x) in range(128)])
+    text = text.encode('ascii', 'replace')
+    # text = ''.join([x for x in list(text) if ord(x) in range(128)])
     return text
 
 
 def index(m):
-    return "{}{}{}".format(asciify(m['text']), m['user'], m['channel'])
+    return "{}{}{}".format(asciify(m['text']), asciify(m['user']), asciify(m['channel']))
 
 
 def onlyemoji(m):
@@ -99,10 +100,11 @@ class LastWeek(object):
 
     def retry(self, url, attempts=3):
 
-        pause = 1.5
+        pause = .5
         increment = 2
         while attempts:
             try:
+                time.sleep(pause)
                 req = requests.get(url)
                 j = req.json()
                 if 'ok' in j and not j['ok']:
@@ -112,7 +114,6 @@ class LastWeek(object):
                     raise RuntimeError("Failed to get payload: {}".format(j))
                 return j
             except Exception, e:
-                time.sleep(pause)
                 attempts -= 1
                 print "Failed to get {}: {}/{} ({} more attempts)".format(url, Exception, e, attempts)
         raise RuntimeError("failed to get {} many times".format(url))
@@ -321,7 +322,7 @@ class LastWeek(object):
             for message in cur_messages:
                 message['channel'] = channel
             if len(cur_messages) and e - s > .5:
-                print "Got {} messages for {}".format(len(cur_messages), channel)
+                print "Got {} messages for {}".format(len(cur_messages), channel.encode('ascii', 'replace'))
             messages += cur_messages
 
         # print "Got a total of {} messages for last week".format(len(messages))
