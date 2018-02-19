@@ -453,7 +453,7 @@ class LastWeek(object):
 
         self.sorted_channels = sorted(activity_by_channel.keys(), key=lambda x: activity_by_channel[x]['$total'], reverse=True)
         users = sorted(activity_by_user.keys())
-        self.sorted_users = sorted(users, key=lambda x: activity_by_user[x]['$total'], reverse=True)
+        self.sorted_users = sorted(users, key=lambda x: words[x], reverse=True)
         self.activity_by_channel = activity_by_channel
         self.activity_by_user = activity_by_user
         self.reactions = reactions
@@ -513,6 +513,12 @@ class LastWeek(object):
                 co['user_activity'].append(value)
             payload['channels'].append(co)
 
+        total_words = 0
+        for user in self.words:
+            total_words += self.words[user]
+
+        payload['total_words'] = '{0:,}'.format(total_words)
+        payload['total_pages'] = '{0:,}'.format((total_words + 499) / 500)
         payload['total_messages'] = total
         payload['total_participants'] = len(self.sorted_users)
         payload['messages_per_participant'] = "{:.1f}".format(total * 1.0 / len(self.sorted_users))
@@ -523,21 +529,22 @@ class LastWeek(object):
         for user in payload['users']:
             ctr += 1
             su = user['name']
-            cur = self.activity_by_user[su]['$total']
+            messages = self.activity_by_user[su]['$total']
+            words = self.words[su]
             c = 0
             for v in self.reactions.get(su, {}).values():
                 c += v
-            reaction_percentage = c * 100.0 / cur
+            reaction_percentage = c * 100.0 / messages
             self.reaction_percentage[su] = reaction_percentage
 
-            running += cur
-            per = cur * 100.0 / total
-            per = (running * 100.0 / total)
-            words = self.words[su]
-            wpm = words / cur
-            user['messages'] = cur
-            user['percentage'] = "{:.1f}".format(cur * 100.0 / total)
-            cumpercentage = (running * 100.0 / total)
+            running += words
+            per = words * 100.0 / total_words
+            per = (running * 100.0 / total_words)
+            user['words'] = words
+            wpm = words / messages
+            user['messages'] = messages
+            user['percentage'] = "{:.1f}".format(words * 100.0 / total_words)
+            cumpercentage = (running * 100.0 / total_words)
             if ctr == 10:
                 payload['topten'] = "{:.1f}%".format(cumpercentage)
             if cumpercentage >= 50.0 and 'fifty' not in payload:

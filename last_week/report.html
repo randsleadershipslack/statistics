@@ -105,7 +105,7 @@
 
         <b>Top ten posters contributed {{payload.topten}} of messages</b><p/>
         <b>Top {{payload.fifty}} posters accounted for about 50% of total volume</b><p/>
-        For each user's total message cell, the first number is their total number of messages sent, the
+        For each user's total message cell, the first number is their total number of words sent, the
         second is the percent of total messages their messages represent, and the third is the running
         percent of messages from all the people ahead of them plus theirs.<br/>for example, if the 2nd
         person had 870, 3.5%, 7.8%, that means that they sent 870 messages; 870 messages represented
@@ -115,6 +115,7 @@
         <b>rphm</b> is reactions per 100 messages -- an indication of how many reactions your messages got on average<p/>
 
         <b>wpm</b> is average words per message<p/>
+        The last number is the total number of messages sent by this user.<p/>
 
         numbers in parentheses after channel names are number of users in channel<p/>
 
@@ -142,18 +143,21 @@
                         </td>
                         <td>
                             <b>
-                                {{payload.total_messages}}m<br/>
-                                {{payload.total_participants}}p<br/>
+                                {{payload.total_words}} words <br>
+                                {{payload.total_pages}} pages<br/>
+                                {{payload.total_messages}} messages<br/>
+                                {{payload.total_participants}} participants<br/>
                                 {{payload.messages_per_participant}} m/p
                             </b>
                         </td>
                         {% for user in payload.users %}
                             <td style="vertical-align: text-top;">
-                                {{user.messages}}<br/>
+                                {{user.words}}<br/>
                                 {{user.percentage}}%<br/>
                                 {{user.cumpercentage}}%<br/>
                                 {{user.rphm}} rphm<br/>
                                 {{user.wpm}} wpm
+                                {{user.messages}}<br/>
                             </td>
                         {% endfor %}
                     </tr>
