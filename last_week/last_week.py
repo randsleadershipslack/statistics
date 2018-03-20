@@ -217,7 +217,12 @@ class LastWeek(object):
         self.users_real_name = {x['name']: x.get("real_name", "") for x in members}
 
     def get_fname(self, oldest, cid, latest):
-        fname = "cache/messages_{}_{}_{}".format(oldest, cid, latest)
+        if oldest:
+            oldest = time.strftime("%Y%m%d", time.localtime(int(oldest)))
+        if latest:
+            latest = time.strftime("%Y%m%d", time.localtime(int(latest)))
+        cid = self.channels_by_id[cid]
+        fname = "cache/messages_{}_{}_{}".format(cid, oldest, latest)
         return fname
 
     def get_messages(self, oldest, cid, latest=None):
