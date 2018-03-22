@@ -98,19 +98,29 @@ class LastWeek(object):
             print "Failed to get day for {}".format(ts)
             sys.exit(0)
 
+    def sleep(self, sleepinterval):
+        # print "Sleeping for {} at {}".format(sleepinterval, time.asctime())
+        time.sleep(sleepinterval)
+
     def retry(self, url, attempts=3):
 
         pause = .5
         increment = 2
         while attempts:
             try:
-                time.sleep(pause)
                 req = requests.get(url)
+                if req.status_code == 429:
+                    retry_after = req.headers['Retry-After']
+                    # print "Retry after {} for {}".format(retry_after, url)
+                    pause = int(retry_after) 
+                    self.sleep(pause)
+                    continue
                 j = req.json()
                 if 'ok' in j and not j['ok']:
                     if j.get("error") == "ratelimited":
                         pause += increment
                         print "Increasing pause time to {}".format(pause)
+                        self.sleep(pause)
                     raise RuntimeError("Failed to get payload: {}".format(j))
                 return j
             except Exception, e:
