@@ -758,6 +758,5 @@ if __name__ == "__main__":
     produce_html = not args.nohtml
     open_browser = not args.nobrowser
     cache = not args.nocache
-    print "upload: {}".format(upload)
     lw = LastWeek(weeks_ago=args.week, debug=args.debug, upload=upload, cache=cache, produce_html=produce_html, report=report)
     lw.run()
