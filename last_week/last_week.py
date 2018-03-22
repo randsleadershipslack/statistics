@@ -112,7 +112,7 @@ class LastWeek(object):
                 if req.status_code == 429:
                     retry_after = req.headers['Retry-After']
                     # print "Retry after {} for {}".format(retry_after, url)
-                    pause = int(retry_after) 
+                    pause = int(retry_after)
                     self.sleep(pause)
                     continue
                 j = req.json()
@@ -166,6 +166,9 @@ class LastWeek(object):
                               remove_all_empty_space=True,
                               reduce_boolean_attributes=True
                               )
+
+    def set_weeks(self, weeks_ago):
+        self.weeks_ago = weeks_ago
 
     def replace_id(self, cid):
         """
@@ -647,6 +650,10 @@ class LastWeek(object):
     def run(self):
         self.get_all_messages()
         self.create_aggregates()
+
+        if not self.report_flag:
+            return
+
         blob = self.create_report() or ""
 
         # payload = {
@@ -655,9 +662,6 @@ class LastWeek(object):
         #    'statistics': self.activity_by_channel
         #}
         #self.payload = payload
-
-        if not self.report_flag:
-            return
 
         fname = "output/activity_{}_to_{}".format(self.start_date, self.end_date)
         html_fname = fname + ".html"
