@@ -356,6 +356,7 @@ class LastWeek(object):
         pureemoji = 0
         self.gendercount = {}
         self.unknown = []
+        self.raccoons = 0
 
         for hour in range(0, 24):
             self.hours[hour] = 0
@@ -374,6 +375,8 @@ class LastWeek(object):
             self.hours[self.hour(message['ts'])] += 1
             uid = message['user']
             text = asciify(message['text'])
+            if text.find(":raccoon:") != -1:
+                self.raccoons += 1
             wc = len(text.split())
             user = self.users[uid]
             gender = self.get_gender(user)
@@ -721,7 +724,9 @@ class LastWeek(object):
         reactions.sort(key=lambda x: self.recount[x])
         reactions.reverse()
         for idx, reaction in enumerate(reactions[0:11]):
+        # for idx, reaction in enumerate(reactions):
             print "{} {} :{}:".format(idx, self.recount[reaction], reaction)
+        print "{} raccoons found".format(self.raccoons)
 
 if __name__ == "__main__":
 
