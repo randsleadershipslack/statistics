@@ -12,6 +12,8 @@ import zipfile
 
 import requests
 
+from filewriter import filewriter
+
 male = [x.strip() for x in open("male", "r").readlines()]
 female = [x.strip() for x in open("female", "r").readlines()]
 undetermined = [x.strip() for x in open("undetermined", "r").readlines()]
@@ -271,9 +273,7 @@ class LastWeek(object):
         messages = [x for x in messages if x.get("user") not in self.ignore_users]
         messages.sort(key=lambda x: float(x['ts']))
         if self.use_cache:
-            f = open(fname, "wb")
-            f.write(json.dumps(messages, indent=4))
-            f.close()
+            filewriter(fname, json.dumps(messages, indent=4))
         return messages
 
     def last_week(self):
@@ -672,15 +672,11 @@ class LastWeek(object):
         json_fname = fname + ".json"
 
         if self.produce_html:
-            f = open(html_fname, "w")
-            f.write(blob.encode("utf8"))
-            f.close()
+            filewriter(html_fname, blob.encode("utf8"))
             if open_browser:
                 subprocess.call(["/usr/bin/open", html_fname])
 
-        f = open(json_fname, "wb")
-        f.write(json.dumps(self.payload, indent=4))
-        f.close()
+        filewriter(json_fname, json.dumps(self.payload, indent=4))
 
         zf = zipfile.ZipFile(zip_fname, mode="w")
         if self.produce_html:
