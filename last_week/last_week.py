@@ -98,19 +98,29 @@ class LastWeek(object):
             print "Failed to get day for {}".format(ts)
             sys.exit(0)
 
+    def sleep(self, sleepinterval):
+        # print "Sleeping for {} at {}".format(sleepinterval, time.asctime())
+        time.sleep(sleepinterval)
+
     def retry(self, url, attempts=3):
 
         pause = .5
         increment = 2
         while attempts:
             try:
-                time.sleep(pause)
                 req = requests.get(url)
+                if req.status_code == 429:
+                    retry_after = req.headers['Retry-After']
+                    # print "Retry after {} for {}".format(retry_after, url)
+                    pause = int(retry_after)
+                    self.sleep(pause)
+                    continue
                 j = req.json()
                 if 'ok' in j and not j['ok']:
                     if j.get("error") == "ratelimited":
                         pause += increment
                         print "Increasing pause time to {}".format(pause)
+                        self.sleep(pause)
                     raise RuntimeError("Failed to get payload: {}".format(j))
                 return j
             except Exception, e:
@@ -156,6 +166,9 @@ class LastWeek(object):
                               remove_all_empty_space=True,
                               reduce_boolean_attributes=True
                               )
+
+    def set_weeks(self, weeks_ago):
+        self.weeks_ago = weeks_ago
 
     def replace_id(self, cid):
         """
@@ -217,7 +230,12 @@ class LastWeek(object):
         self.users_real_name = {x['name']: x.get("real_name", "") for x in members}
 
     def get_fname(self, oldest, cid, latest):
-        fname = "cache/messages_{}_{}_{}".format(oldest, cid, latest)
+        if oldest:
+            oldest = time.strftime("%Y%m%d", time.localtime(int(oldest)))
+        if latest:
+            latest = time.strftime("%Y%m%d", time.localtime(int(latest)))
+        cid = self.channels_by_id[cid]
+        fname = "cache/messages_{}_{}_{}".format(cid, oldest, latest)
         return fname
 
     def get_messages(self, oldest, cid, latest=None):
@@ -635,6 +653,10 @@ class LastWeek(object):
     def run(self):
         self.get_all_messages()
         self.create_aggregates()
+
+        if not self.report_flag:
+            return
+
         blob = self.create_report() or ""
 
         # payload = {
@@ -643,9 +665,6 @@ class LastWeek(object):
         #    'statistics': self.activity_by_channel
         #}
         #self.payload = payload
-
-        if not self.report_flag:
-            return
 
         fname = "output/activity_{}_to_{}".format(self.start_date, self.end_date)
         html_fname = fname + ".html"
@@ -744,6 +763,5 @@ if __name__ == "__main__":
     produce_html = not args.nohtml
     open_browser = not args.nobrowser
     cache = not args.nocache
-    print "upload: {}".format(upload)
     lw = LastWeek(weeks_ago=args.week, debug=args.debug, upload=upload, cache=cache, produce_html=produce_html, report=report)
     lw.run()
