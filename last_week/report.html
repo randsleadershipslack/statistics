@@ -251,68 +251,6 @@
                     </td>
 
                     <td style="vertical-align: text-top;" nowrap>
-                        <b>Gender Statistics</b><p/>
-
-                        {% if payload.undetermined_authors_percent %}
-                            {{payload.undetermined_authors_percent}} of authors
-                            were of undetermined gender <p/>
-                        {% endif %}
-
-                        {% if payload.female_authors_percent %}
-                            {{payload.female_authors_percent}} of authors
-                            were women <p/>
-                        {% endif %}
-
-                        {% if payload.male_authors_percent %}
-                            {{payload.male_authors_percent}} of authors
-                            were men<p/>
-                        {% endif %}
-
-                        <hr/>
-
-                        {% if payload.undetermined_gender_message_count %}
-                            {{payload.undetermined_gender_message_count}}
-                            ({{payload.undetermined_gender_message_percentage}}%)
-                            messages from authors identified as undetermined<p/>
-                        {% endif %}
-
-                        {% if payload.female_gender_message_count %}
-                            {{payload.female_gender_message_count}}
-                            ({{payload.female_gender_message_percentage}}%)
-                            messages from authors identified as female<p/>
-                        {% endif %}
-
-                        {% if payload.male_gender_message_count %}
-                            {{payload.male_gender_message_count}}
-                            ({{payload.male_gender_message_percentage}}%)
-                            messages from authors identified as male<p/>
-                        {% endif %}
-
-                        <hr/>
-
-                        {% if payload.highest_female_rank %}
-                            Highest ranked female-gender author:
-                            <b>{{payload.highest_female_name}}</b>
-                            rank {{payload.highest_female_rank}}<p/>
-                        {% endif %}
-
-                        {% if payload.highest_undetermined_name %}
-                            Highest ranked undetermined-gender author:
-                            <b>{{payload.highest_undetermined_name}}</b>
-                            rank {{payload.highest_undetermined_rank}}<p/>
-                        {% endif %}
-
-
-                        {% if payload.unknown_authors %}
-                            <hr/>
-                            New, unknown, authors:
-                            <ul>
-                                {% for ua in payload.unknown_authors %}
-                                <li>{{ua}}</li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-
                     </td>
 
                     <td style="vertical-align: text-top;">
