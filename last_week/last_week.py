@@ -72,8 +72,8 @@ class LastWeek(object):
     slack = "rands-leadership"
     surl = "https://{}.slack.com/api/".format(slack)
     upload_channel = "zmeta-statistics"
-    ignore_channels = ['destalinator-log', 'zmeta-statistics', 'rands-tech', 'rands-slack-rules', 'slack-support']
-    ignore_patterns = ["^zmeta-"]
+    ignore_channels = ['destalinator-log', 'zmeta-statistics', 'slack-support']
+    ignore_patterns = ["^zmeta-", "^rands-"]
     ignore_users = ['USLACKBOT']
     dayidx = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
