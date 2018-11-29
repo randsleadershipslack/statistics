@@ -670,11 +670,17 @@ class LastWeek(object):
         html_fname = fname + ".html"
         zip_fname = fname + ".zip"
         json_fname = fname + ".json"
+        pdf_fname = fname + ".pdf"
 
         if self.produce_html:
             filewriter(html_fname, blob.encode("utf8"))
             if open_browser:
                 subprocess.call(["/usr/bin/open", html_fname])
+            # Generate PDF
+            cmd = "xvfb-run html2pdf --orientation Landscape".split() 
+            cmd.append(html_fname)
+            cmd.append(pdf_fname)
+            subprocess.call(cmd)
 
         filewriter(json_fname, json.dumps(self.payload, indent=4))
 
@@ -686,6 +692,7 @@ class LastWeek(object):
 
         if self.upload_flag:
             self.upload(zip_fname)
+            self.upload(pdf_fname)
 
         messages = {}
         counts = {}
