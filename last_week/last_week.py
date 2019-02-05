@@ -12,6 +12,8 @@ import zipfile
 
 import requests
 
+from requests.structures import CaseInsensitiveDict
+
 from filewriter import filewriter
 
 male = [x.strip() for x in open("male", "r").readlines()]
@@ -220,6 +222,13 @@ class LastWeek(object):
             return True
         return False
 
+    def get_names(self, member):
+        profile = member['profile']
+        dname = profile.get("display_name")
+        rname = profile.get("real_name")
+        name = member['name']
+        return (dname, rname, name)
+
     def get_users(self):
         url = self.surl + "users.list?token=" + self.api_token
         payload = self.retry(url)
@@ -228,8 +237,25 @@ class LastWeek(object):
         except:
             raise RuntimeError("payload: {}".format(payload))
         self.user_payload = members
-        self.users = {x['id']: x['name'] for x in members}
-        self.users_real_name = {x['name']: x.get("real_name", "") for x in members}
+        self.users = {}
+        for x in members:
+            id = x['id']
+            name = x['profile'].get("display_name", "")
+            if name == "":
+                name = x['name']
+            self.users[id] = name
+        self.users_real_name = CaseInsensitiveDict()
+        for member in members:
+            names = self.get_names(member)
+            for name in names:
+                if not name:
+                    continue
+                for name2 in names:
+                    if not name2:
+                        continue
+                    self.users_real_name[name] = name2
+
+        # print json.dumps(self.users_real_name, indent=4)
 
     def get_fname(self, oldest, cid, latest):
         if oldest:
@@ -670,11 +696,17 @@ class LastWeek(object):
         html_fname = fname + ".html"
         zip_fname = fname + ".zip"
         json_fname = fname + ".json"
+        pdf_fname = fname + ".pdf"
 
         if self.produce_html:
             filewriter(html_fname, blob.encode("utf8"))
             if open_browser:
                 subprocess.call(["/usr/bin/open", html_fname])
+            # Generate PDF
+            cmd = "xvfb-run html2pdf --orientation Landscape".split() 
+            cmd.append(html_fname)
+            cmd.append(pdf_fname)
+            subprocess.call(cmd)
 
         filewriter(json_fname, json.dumps(self.payload, indent=4))
 
@@ -686,6 +718,7 @@ class LastWeek(object):
 
         if self.upload_flag:
             self.upload(zip_fname)
+            self.upload(pdf_fname)
 
         messages = {}
         counts = {}
